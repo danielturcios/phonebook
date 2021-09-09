@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import Filter from './components/Filter'
 import PersonForm from "./components/PersonForm"
 import Persons from "./components/Persons"
+import "./App.css"
 
 function App() {
   const [ persons, setPersons ] = useState([
