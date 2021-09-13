@@ -29,7 +29,6 @@ function App() {
       person => person.name.toLocaleLowerCase().indexOf(newFilter.toLocaleLowerCase()) !== -1)
   }
 
-  // TODO: Finish filter
   return (
     <div>
       <h2>Phonebook</h2>
