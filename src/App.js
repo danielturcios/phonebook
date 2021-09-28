@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import axios from "axios"
+import personService from './services/persons'
 import Filter from './components/Filter'
 import PersonForm from "./components/PersonForm"
 import Persons from "./components/Persons"
@@ -13,20 +13,36 @@ function App() {
 
   useEffect(() => {
     console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   }, [])
 
-  console.log('render', persons.length, 'persons')
 
   let filteredPersons = persons
   if (newFilter) {
     filteredPersons = persons.filter(
       person => person.name.toLocaleLowerCase().indexOf(newFilter.toLocaleLowerCase()) !== -1)
+  }
+
+  const toDelete = ( name, id ) => {
+    console.log(id)
+    if (window.confirm(`Delete ${name} ?`)) {
+      personService
+        .remove(id)
+        .then(success => {
+          console.log("delete success")
+          setPersons(persons.filter(person => person.id !== id))
+        })
+        .catch(error => {
+          alert(
+            `${name} was already deleted from server`
+          )
+          setPersons(persons.filter(person => person.id !== id))
+        })
+    }
   }
 
   return (
@@ -45,7 +61,10 @@ function App() {
       />
 
       <h2>Numbers</h2>
-      <Persons filteredPersons={filteredPersons} />
+      <Persons 
+        filteredPersons={filteredPersons}
+        toDelete={toDelete} 
+      />
       
     </div>
   );
