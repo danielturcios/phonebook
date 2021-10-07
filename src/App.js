@@ -3,13 +3,15 @@ import personService from './services/persons'
 import Filter from './components/Filter'
 import PersonForm from "./components/PersonForm"
 import Persons from "./components/Persons"
-import "./App.css"
+import Notification from "./components/Notification"
 
 function App() {
   const [ persons, setPersons ] = useState([])
   const [ newName, setName ] = useState('')
   const [ newNumber, setNumber ] = useState('')
   const [ newFilter, setFilter ] = useState('')
+  const [successMessage, setMessage] = useState(null)
+  const [isError, setError] = useState(false)
 
   useEffect(() => {
     console.log('effect')
@@ -19,7 +21,6 @@ function App() {
         setPersons(initialPersons)
       })
   }, [])
-
 
   let filteredPersons = persons
   if (newFilter) {
@@ -48,6 +49,12 @@ function App() {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification 
+        message={successMessage} 
+        isError={isError} 
+        setError={setError} 
+      />
+
       <Filter value={newFilter} onChange={setFilter} />
 
       <h2>add a new</h2>
@@ -57,7 +64,9 @@ function App() {
         newName={newName} 
         setName={setName}
         newNumber={newNumber}
-        setNumber={setNumber} 
+        setNumber={setNumber}
+        setMessage={setMessage}
+        setError={setError}
       />
 
       <h2>Numbers</h2>

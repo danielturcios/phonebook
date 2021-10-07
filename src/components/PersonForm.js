@@ -1,7 +1,7 @@
 import React from 'react'
 import personServices from '../services/persons'
 
-const PersonForm = ( { persons, setPersons, newName, setName, newNumber, setNumber } ) => {
+const PersonForm = ( { persons, setPersons, newName, setName, newNumber, setNumber, setMessage, setError } ) => {
     const addPerson = (event) => {
         event.preventDefault()
         const personObject = {
@@ -9,20 +9,39 @@ const PersonForm = ( { persons, setPersons, newName, setName, newNumber, setNumb
           number: newNumber
         }
     
+        // if person already exists in database, update number to new number
         if (persons.some( person => person.name.toLowerCase() === personObject.name.toLowerCase())) {          
-          if (window.confirm(`${personObject.name} is already added to phonebook, replace the old number with a new one?`)) {
-            const person = persons.find(person => person.name.toLowerCase() === personObject.name.toLowerCase())
-            const changedPerson = {...person, number: newNumber}
+          const person = persons.find(person => person.name.toLowerCase() === personObject.name.toLowerCase())
+          const changedPerson = {...person, number: newNumber}
 
-            personServices
-              .update(person.id, changedPerson)
-              .then(returnedPerson => {
-                setPersons(persons.map(person => person.id !== changedPerson.id ? person : returnedPerson))
-                setName('')
-                setNumber('')
-              })
-          }
+          personServices
+            .update(person.id, changedPerson)
+            .then(returnedPerson => {
+              setPersons(persons.map(person => person.id !== changedPerson.id ? person : returnedPerson))
+              setName('')
+              setNumber('')
+              setError(false)
+            })
+            // attempting to update number from person previously removed from database
+            .catch(error => {
+              setError(true) // changes css
+              setMessage(
+                `Information of ${changedPerson.name} has already been removed from server`
+              )
+              setTimeout(() => {
+                setMessage(null)
+              }, 5000)
+              setPersons(persons.filter(p => p.id !== person.id))
+            })
+            // updated person's new number successfully 
+            setMessage(
+              `Updated ${personObject.name}'s number`
+            )
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
         }
+        // person does not exist in current database -> create new personObject in the database
         else {
           personServices
             .create(personObject)
@@ -30,7 +49,14 @@ const PersonForm = ( { persons, setPersons, newName, setName, newNumber, setNumb
               setPersons(persons.concat(returnedPerson))
               setName('')
               setNumber('')
+              setError(false)
             })
+          setMessage(
+            `Added ${personObject.name}`
+          )
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
         }
     }
     
